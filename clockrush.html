@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clock Rush — Past Continuous</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#12213B;
+    --navy-deep:#0B1626;
+    --teal:#0F3D3E;
+    --brass:#C89B3C;
+    --brass-light:#E8C878;
+    --cream:#F4EBD6;
+    --coral:#E8604C;
+    --coral-dark:#B8402F;
+    --ok:#5FAE7C;
+    --panel:#16274A;
+    --panel-2:#1C3057;
+    --line: rgba(232,224,198,0.14);
+    --line-strong: rgba(232,224,198,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(1200px 700px at 20% -10%, rgba(200,155,60,0.10), transparent 60%),
+      radial-gradient(1000px 800px at 100% 110%, rgba(15,61,62,0.35), transparent 55%),
+      var(--navy-deep);
+    color:var(--cream);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  #app{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+    position:relative;
+  }
+  .gear{
+    position:fixed;
+    opacity:0.06;
+    pointer-events:none;
+    z-index:0;
+  }
+  .screen{
+    position:relative;
+    z-index:1;
+    animation:fadeIn .5s ease;
+  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+  }
+  .brand-title{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--brass-light);
+  }
+  .brand-title .clockface{
+    width:30px;height:30px;border-radius:50%;
+    border:2px solid var(--brass-light);
+    position:relative;
+    flex:none;
+  }
+  .brand-title .clockface::before,.brand-title .clockface::after{
+    content:'';
+    position:absolute;
+    background:var(--brass-light);
+    top:50%;left:50%;
+    transform-origin:left center;
+  }
+  .brand-title .clockface::before{width:8px;height:2px;transform:translate(0,-1px) rotate(-40deg);}
+  .brand-title .clockface::after{width:6px;height:2px;transform:translate(0,-1px) rotate(90deg);}
+
+  .icon-btn{
+    background:transparent;
+    border:1px solid var(--line-strong);
+    color:var(--cream);
+    width:38px;height:38px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .icon-btn:hover{background:rgba(232,224,198,0.08);}
+  .icon-btn:active{transform:scale(0.94);}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px;
+    margin-bottom:18px;
+  }
+
+  .lede{color:rgba(244,235,214,0.72); font-size:15px; line-height:1.6; margin:0 0 20px;}
+
+  button.primary{
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    padding:14px 24px;
+    border-radius:12px;
+    cursor:pointer;
+    width:100%;
+    transition:background .15s ease, transform .08s ease;
+    letter-spacing:0.2px;
+  }
+  button.primary:hover{background:var(--coral-dark);}
+  button.primary:active{transform:scale(0.985);}
+  button.primary:disabled{opacity:0.4; cursor:not-allowed;}
+
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--line-strong);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  button.ghost:hover{background:rgba(232,224,198,0.08);}
+
+  input[type=text]{
+    width:100%;
+    background:var(--navy);
+    border:1px solid var(--line-strong);
+    color:var(--cream);
+    padding:13px 14px;
+    border-radius:10px;
+    font-size:16px;
+    font-family:'Inter',sans-serif;
+  }
+  input[type=text]:focus{outline:2px solid var(--brass); outline-offset:1px;}
+  label.field-label{font-size:13px; color:rgba(244,235,214,0.6); display:block; margin:0 0 6px; font-weight:600;}
+
+  /* CHARACTER BUILDER */
+  .avatar-preview{
+    width:120px;height:120px;
+    border-radius:50%;
+    margin:0 auto 22px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:56px;
+    border:3px solid var(--brass-light);
+    position:relative;
+    transition:background .2s ease;
+  }
+  .avatar-preview::after{
+    content:'';
+    position:absolute;
+    inset:-9px;
+    border-radius:50%;
+    border:1px dashed rgba(232,200,120,0.4);
+  }
+  .swatch-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .swatch{
+    width:38px;height:38px;border-radius:50%;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:transform .1s ease, border-color .15s ease;
+  }
+  .swatch:hover{transform:scale(1.08);}
+  .swatch.active{border-color:var(--cream); transform:scale(1.1);}
+  .face-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .face-opt{
+    width:52px;height:52px;
+    border-radius:12px;
+    background:var(--navy);
+    border:1px solid var(--line-strong);
+    font-size:24px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .face-opt.active{border-color:var(--brass-light); background:rgba(200,155,60,0.15);}
+
+  /* MENU RULES */
+  .rule-item{
+    display:flex; gap:12px; align-items:flex-start;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rule-item:last-child{border-bottom:none;}
+  .rule-ico{
+    width:34px;height:34px;flex:none;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:700;
+    background:rgba(200,155,60,0.16);
+    color:var(--brass-light);
+  }
+  .rule-text b{color:var(--cream);}
+  .rule-text{font-size:14px; color:rgba(244,235,214,0.72); line-height:1.5;}
+
+  /* QUIZ SCREEN */
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; font-size:13px; color:rgba(244,235,214,0.65); font-weight:600;}
+  .timerbar-track{
+    height:8px;
+    background:var(--navy);
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:20px;
+    border:1px solid var(--line);
+  }
+  .timerbar-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--ok), var(--brass));
+    width:100%;
+    transition:width 0.1s linear, background .3s ease;
+  }
+  .timerbar-fill.danger{background:var(--coral);}
+  .qtag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    color:var(--brass-light);
+    background:rgba(200,155,60,0.14);
+    padding:4px 10px;
+    border-radius:999px;
+    margin-bottom:12px;
+  }
+  .qtext{font-size:19px; font-weight:600; line-height:1.45; margin:0 0 22px; font-family:'Space Grotesk',sans-serif;}
+  .qtext em{color:var(--brass-light); font-style:normal;}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .opt{
+    background:var(--navy);
+    border:1.5px solid var(--line-strong);
+    color:var(--cream);
+    padding:16px 14px;
+    border-radius:12px;
+    font-size:15px;
+    text-align:left;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    transition:border-color .12s ease, background .12s ease, transform .08s ease;
+  }
+  .opt:hover:not(:disabled){border-color:var(--brass-light); background:rgba(200,155,60,0.08);}
+  .opt:active:not(:disabled){transform:scale(0.98);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:rgba(95,174,124,0.22); border-color:var(--ok); color:#D9F2E3;}
+  .opt.wrong{background:rgba(232,96,76,0.22); border-color:var(--coral); color:#FBD9D3;}
+  .opt.dim{opacity:0.4;}
+
+  .feedback-line{
+    margin-top:16px;
+    font-size:13px;
+    color:rgba(244,235,214,0.7);
+    min-height:18px;
+  }
+
+  .score-pop{
+    position:fixed;
+    top:18px; left:50%; transform:translateX(-50%);
+    background:var(--brass);
+    color:var(--navy-deep);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:9px 18px;
+    border-radius:999px;
+    z-index:50;
+    animation:popIn .25s ease, popOut .25s ease 1.6s forwards;
+  }
+  @keyframes popIn{from{opacity:0; transform:translate(-50%,-14px);} to{opacity:1; transform:translate(-50%,0);}}
+  @keyframes popOut{to{opacity:0; transform:translate(-50%,-14px);}}
+
+  /* LEADERBOARD */
+  .lb-row{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 10px;
+    border-radius:12px;
+    margin-bottom:8px;
+    background:var(--navy);
+    border:1px solid var(--line);
+    transition:transform .25s ease;
+  }
+  .lb-row.me{border-color:var(--brass-light); background:rgba(200,155,60,0.1);}
+  .lb-rank{
+    width:26px; text-align:center; font-weight:700; font-family:'Space Grotesk',sans-serif;
+    color:var(--brass-light); font-size:15px;
+  }
+  .lb-avatar{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px; flex:none;
+  }
+  .lb-name{flex:1; font-weight:600; font-size:14px;}
+  .lb-tag{font-size:11px; color:rgba(244,235,214,0.5); margin-left:6px; font-weight:500;}
+  .lb-score{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--brass-light);}
+
+  .sabotage-note{
+    background:rgba(232,96,76,0.1);
+    border:1px solid rgba(232,96,76,0.35);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13px;
+    color:#F3C6BE;
+    margin-bottom:16px;
+  }
+
+  .target-list{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
+  .target-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--navy);
+    border:1.5px solid var(--line-strong);
+    border-radius:12px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .12s ease;
+  }
+  .target-row:hover{border-color:var(--coral);}
+  .target-row.selected{border-color:var(--coral); background:rgba(232,96,76,0.1);}
+
+  .sab-options{display:flex; flex-direction:column; gap:10px; margin-bottom:8px;}
+  .sab-opt{
+    display:flex; align-items:center; gap:12px;
+    background:var(--navy);
+    border:1.5px solid var(--line-strong);
+    border-radius:12px;
+    padding:13px 14px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .sab-opt:hover{border-color:var(--brass-light);}
+  .sab-opt .sab-ico{font-size:20px; flex:none; width:26px; text-align:center;}
+  .sab-opt .sab-txt b{display:block; font-size:14px;}
+  .sab-opt .sab-txt span{font-size:12px; color:rgba(244,235,214,0.6);}
+
+  .points-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(200,155,60,0.16);
+    color:var(--brass-light);
+    font-weight:700; font-size:13px;
+    padding:6px 12px; border-radius:999px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+
+  /* FINAL */
+  .podium{display:flex; align-items:flex-end; gap:10px; justify-content:center; margin:26px 0 10px;}
+  .podium-col{display:flex; flex-direction:column; align-items:center; width:100px;}
+  .podium-avatar{
+    width:52px;height:52px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px; margin-bottom:8px;
+    border:2px solid var(--brass-light);
+  }
+  .podium-bar{
+    width:100%;
+    border-radius:10px 10px 0 0;
+    background:var(--panel-2);
+    border:1px solid var(--line-strong);
+    border-bottom:none;
+    display:flex; align-items:flex-start; justify-content:center;
+    padding-top:8px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    color:var(--brass-light);
+  }
+  .podium-name{font-size:12px; margin-top:6px; text-align:center; font-weight:600;}
+
+  .toggle-row{display:flex; gap:10px; margin-top:16px;}
+
+  .muted-small{font-size:12px; color:rgba(244,235,214,0.45);}
+
+  @media (max-width:480px){
+    .options{grid-template-columns:1fr;}
+    .qtext{font-size:17px;}
+  }
+
+  ::selection{background:var(--brass); color:var(--navy-deep);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===================== AUDIO ENGINE ===================== */
+  var AudioCtx = window.AudioContext || window.webkitAudioContext;
+  var actx = null;
+  var musicOn = true;
+  var musicNodes = null;
+  var musicTimer = null;
+
+  function ensureAudio(){
+    if(!actx){ actx = new AudioCtx(); }
+    if(actx.state === 'suspended'){ actx.resume(); }
+  }
+
+  function tone(freq, start, dur, type, gainPeak, glide){
+    if(!actx) return;
+    var osc = actx.createOscillator();
+    var gain = actx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, actx.currentTime + start);
+    if(glide){ osc.frequency.linearRampToValueAtTime(glide, actx.currentTime + start + dur); }
+    gain.gain.setValueAtTime(0, actx.currentTime + start);
+    gain.gain.linearRampToValueAtTime(gainPeak || 0.12, actx.currentTime + start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + start + dur);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start(actx.currentTime + start);
+    osc.stop(actx.currentTime + start + dur + 0.05);
+  }
+
+  function sfxClick(){ ensureAudio(); tone(720,0,0.06,'square',0.05); }
+  function sfxSelect(){ ensureAudio(); tone(500,0,0.05,'sine',0.06); tone(700,0.03,0.06,'sine',0.05); }
+  function sfxCorrect(){ ensureAudio(); tone(523,0,0.11,'triangle',0.11); tone(659,0.09,0.11,'triangle',0.11); tone(784,0.18,0.16,'triangle',0.12); }
+  function sfxWrong(){ ensureAudio(); tone(300,0,0.18,'sawtooth',0.09,160); }
+  function sfxTick(){ ensureAudio(); tone(880,0,0.035,'square',0.035); }
+  function sfxSabotage(){ ensureAudio(); tone(200,0,0.05,'sawtooth',0.1); tone(140,0.05,0.16,'sawtooth',0.12,80); }
+  function sfxWhoosh(){ ensureAudio(); tone(180,0,0.28,'sine',0.09,520); }
+  function sfxVictory(){
+    ensureAudio();
+    var seq=[523,659,784,1046];
+    seq.forEach(function(f,i){ tone(f,i*0.13,0.22,'triangle',0.13); });
+  }
+  function sfxRank(){ ensureAudio(); tone(440,0,0.08,'sine',0.08); tone(660,0.06,0.1,'sine',0.08); }
+
+  function startMusic(){
+    ensureAudio();
+    if(musicTimer) return;
+    var pattern = [261.6,0,329.6,0,392.0,0,329.6,0,293.7,0,349.2,0,440.0,0];
+    var step = 0;
+    musicTimer = setInterval(function(){
+      if(!musicOn){ return; }
+      var f = pattern[step % pattern.length];
+      if(f){ tone(f, 0, 0.34, 'sine', 0.028); tone(f/2, 0, 0.34, 'triangle', 0.018); }
+      step++;
+    }, 260);
+  }
+  function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } }
+  function toggleMusic(){
+    musicOn = !musicOn;
+    if(musicOn){ ensureAudio(); startMusic(); } else { }
+    renderMusicBtn();
+  }
+  function renderMusicBtn(){
+    var b = document.getElementById('musicToggle');
+    if(b) b.innerHTML = musicOn ? '&#9835;' : '&#128263;';
+  }
+
+  /* ===================== GAME DATA ===================== */
+  var AVATAR_COLORS = [
+    {name:'Latão', hex:'#C89B3C'},
+    {name:'Coral', hex:'#E8604C'},
+    {name:'Verde', hex:'#5FAE7C'},
+    {name:'Azul', hex:'#4C87C8'},
+    {name:'Violeta', hex:'#9B6FC8'},
+    {name:'Rosa', hex:'#D97AA0'}
+  ];
+  var AVATAR_FACES = ['🕰️','⚙️','🧭','🔧','🪄','🦉','🐉','🎩'];
+
+  var BOT_NAMES = ['Vovó Tempo', 'Capitão Engrenagem', 'Nina Relógio', 'Sr. Passado'];
+  var BOT_FACES = ['⏳','⚙️','🧭','🎩'];
+  var BOT_COLORS = ['#4C87C8','#5FAE7C','#D97AA0','#9B6FC8'];
+
+  var QUESTIONS = [
+    {tag:'Complete', text:'Ontem às 20h, eu ___ um filme quando o telefone tocou.', opts:['was watching','were watching','watched','am watching'], correct:0},
+    {tag:'Complete', text:'They ___ football when it started to rain.', opts:['plays','was playing','were playing','played'], correct:2},
+    {tag:'Erro', text:'Qual frase está no Past Continuous corretamente?', opts:['She were cooking dinner.','She was cooking dinner.','She is cooking dinner.','She cook dinner.'], correct:1},
+    {tag:'Complete', text:'What ___ you doing at 9pm last night?', opts:['was','were','did','are'], correct:1},
+    {tag:'Contexto', text:'"Enquanto eu estudava, minha irmã dormia" — em inglês:', opts:['While I studied, my sister slept.','While I was studying, my sister was sleeping.','While I study, my sister sleeps.','While I am studying, my sister slept.'], correct:1},
+    {tag:'Complete', text:'He wasn\\'t ___ attention when the teacher explained the rule.', opts:['pay','paying','paid','pays'], correct:1},
+    {tag:'Negativa', text:'Qual é a negativa correta de "We were working"?', opts:['We not were working.','We weren\\'t working.','We wasn\\'t working.','We didn\\'t working.'], correct:1},
+    {tag:'Complete', text:'At midnight, the whole city ___ silently.', opts:['sleep','were sleeping','was sleeping','sleeps'], correct:2},
+    {tag:'Interrupção', text:'"I ___ dinner when the power went out." (interrupção clássica)', opts:['cook','was cooking','were cooking','cooked'], correct:1},
+    {tag:'Pergunta', text:'Qual pergunta está correta?', opts:['Was they dancing?','Were they dancing?','Did they were dancing?','Are they were dancing?'], correct:1},
+    {tag:'Complete', text:'While the kids ___ in the yard, it began to snow.', opts:['play','was playing','were playing','plays'], correct:2},
+    {tag:'Uso', text:'Past Continuous descreve principalmente:', opts:['Um fato permanente','Uma ação em progresso no passado','Uma ação futura','Um hábito atual'], correct:1},
+    {tag:'Complete', text:'I ___ TV all evening yesterday.', opts:['was watching','watch','were watching','watched'], correct:0},
+    {tag:'Erro', text:'Qual frase tem um erro gramatical?', opts:['They were talking loudly.','She was reading a book.','You was driving too fast.','We were waiting outside.'], correct:2},
+    {tag:'Complete', text:'At 7am, the sun ___ already ___.', opts:['was / rising','were / rising','was / rise','is / rising'], correct:0}
+  ];
+
+  var TOTAL_Q = QUESTIONS.length;
+  var TIME_PER_Q = 12;
+
+  /* ===================== STATE ===================== */
+  var state = {
+    screen:'character',
+    player:{name:'', color:AVATAR_COLORS[0].hex, face:AVATAR_FACES[0], score:0, streak:0, sabotagePoints:0},
+    bots:BOT_NAMES.map(function(n,i){ return {name:n, face:BOT_FACES[i], color:BOT_COLORS[i], score:0, hindered:false, boosted:false}; }),
+    qIndex:0,
+    timeLeft:TIME_PER_Q,
+    timerHandle:null,
+    answered:false,
+    sabotageTarget:null,
+    lastGain:0
+  };
+
+  var shuffledQ = QUESTIONS.slice();
+
+  function root(){ return document.getElementById('app'); }
+  function on(id, ev, fn){ var el=document.getElementById(id); if(el) el.addEventListener(ev, fn); }
+
+  /* ===================== RENDER: HEADER ===================== */
+  function headerHTML(subtitle){
+    return '' +
+    '<div class="brand">' +
+      '<div class="brand-title"><span class="clockface"></span>Clock Rush</div>' +
+      '<button class="icon-btn" id="musicToggle" title="Música" aria-label="Ligar ou desligar música">&#9835;</button>' +
+    '</div>';
+  }
+
+  /* ===================== SCREEN: CHARACTER ===================== */
+  function renderCharacter(){
+    var p = state.player;
+    var swatches = AVATAR_COLORS.map(function(c){
+      return '<div class="swatch" data-color="'+c.hex+'" style="background:'+c.hex+'" title="'+c.name+'"></div>';
+    }).join('');
+    var faces = AVATAR_FACES.map(function(f){
+      return '<div class="face-opt" data-face="'+f+'">'+f+'</div>';
+    }).join('');
+
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:24px;margin:4px 0 4px;">Monte seu viajante do tempo</h1>' +
+      '<p class="lede">Personalize seu avatar antes de embarcar na corrida contra o relógio do Past Continuous.</p>' +
+      '<div class="card">' +
+        '<div class="avatar-preview" id="avatarPreview" style="background:'+p.color+'22; border-color:'+p.color+';">'+p.face+'</div>' +
+        '<label class="field-label">Cor do seu engrenagem</label>' +
+        '<div class="swatch-row" id="swatchRow">'+swatches+'</div>' +
+        '<label class="field-label">Símbolo</label>' +
+        '<div class="face-row" id="faceRow">'+faces+'</div>' +
+        '<label class="field-label">Como devemos te chamar?</label>' +
+        '<input type="text" id="nameInput" maxlength="16" placeholder="Seu nome" value="'+p.name+'" style="margin-bottom:8px;">' +
+        '<div class="muted-small" id="nameError" style="color:var(--coral); min-height:16px;"></div>' +
+      '</div>' +
+      '<button class="primary" id="toRules">Continuar</button>' +
+    '</div>';
+
+    highlightSwatch();
+    highlightFace();
+
+    document.querySelectorAll('.swatch').forEach(function(el){
+      el.addEventListener('click', function(){
+        ensureAudio(); sfxSelect();
+        state.player.color = el.getAttribute('data-color');
+        highlightSwatch();
+        updatePreview();
+      });
+    });
+    document.querySelectorAll('.face-opt').forEach(function(el){
+      el.addEventListener('click', function(){
+        ensureAudio(); sfxSelect();
+        state.player.face = el.getAttribute('data-face');
+        highlightFace();
+        updatePreview();
+      });
+    });
+    on('nameInput','input', function(e){ state.player.name = e.target.value; });
+    on('toRules','click', function(){
+      ensureAudio();
+      var name = state.player.name.trim();
+      if(!name){
+        document.getElementById('nameError').textContent = 'Digite um nome antes de continuar.';
+        sfxWrong();
+        return;
+      }
+      state.player.name = name;
+      sfxWhoosh();
+      startMusic();
+      state.screen = 'rules';
+      render();
+    });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+  function highlightSwatch(){
+    document.querySelectorAll('.swatch').forEach(function(el){
+      el.classList.toggle('active', el.getAttribute('data-color') === state.player.color);
+    });
+  }
+  function highlightFace(){
+    document.querySelectorAll('.face-opt').forEach(function(el){
+      el.classList.toggle('active', el.getAttribute('data-face') === state.player.face);
+    });
+  }
+  function updatePreview(){
+    var el = document.getElementById('avatarPreview');
+    if(el){ el.style.background = state.player.color+'22'; el.style.borderColor = state.player.color; el.textContent = state.player.face; }
+  }
+
+  /* ===================== SCREEN: RULES ===================== */
+  function renderRules(){
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:24px;margin:4px 0 4px;">Como funciona</h1>' +
+      '<p class="lede">Você compete contra 4 viajantes do tempo em '+TOTAL_Q+' perguntas sobre Past Continuous.</p>' +
+      '<div class="card">' +
+        '<div class="rule-item"><div class="rule-ico">⏱</div><div class="rule-text"><b>Velocidade vale pontos.</b> Quanto mais rápido você responder certo, mais pontos ganha — até 1000 por pergunta.</div></div>' +
+        '<div class="rule-item"><div class="rule-ico">🔥</div><div class="rule-text"><b>Sequências dão bônus.</b> Acertos seguidos aumentam seu multiplicador de pontos.</div></div>' +
+        '<div class="rule-item"><div class="rule-ico">⚡</div><div class="rule-text"><b>Sabotagem.</b> A cada 3 perguntas, use pontos de sabotagem para atrapalhar um adversário: atrasar seu tempo, embaralhar sua atenção ou roubar pontos.</div></div>' +
+        '<div class="rule-item"><div class="rule-ico">🏆</div><div class="rule-text"><b>Ranking ao vivo.</b> O placar é atualizado após cada rodada — fique de olho na liderança.</div></div>' +
+      '</div>' +
+      '<button class="primary" id="toQuiz">Começar corrida</button>' +
+      '<div style="height:10px;"></div>' +
+      '<button class="ghost" id="backChar" style="width:100%;">Voltar</button>' +
+    '</div>';
+
+    on('toQuiz','click', function(){
+      ensureAudio(); sfxWhoosh();
+      shuffledQ = shuffle(QUESTIONS.slice());
+      state.qIndex = 0;
+      state.player.score = 0;
+      state.player.streak = 0;
+      state.player.sabotagePoints = 0;
+      state.bots.forEach(function(b){ b.score = 0; b.hindered=false; b.boosted=false; });
+      state.screen = 'quiz';
+      render();
+    });
+    on('backChar','click', function(){ ensureAudio(); sfxClick(); state.screen='character'; render(); });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+
+  /* ===================== SCREEN: QUIZ ===================== */
+  function renderQuiz(){
+    var q = shuffledQ[state.qIndex];
+    state.answered = false;
+    state.timeLeft = TIME_PER_Q;
+
+    var optsHTML = q.opts.map(function(opt, i){
+      return '<button class="opt" data-idx="'+i+'">'+escapeHTML(opt)+'</button>';
+    }).join('');
+
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<div class="quiz-top"><span>Pergunta '+(state.qIndex+1)+' de '+TOTAL_Q+'</span><span class="points-chip">⚡ '+state.player.sabotagePoints+'</span></div>' +
+      '<div class="timerbar-track"><div class="timerbar-fill" id="timerFill"></div></div>' +
+      '<div class="card">' +
+        '<span class="qtag">'+q.tag+'</span>' +
+        '<p class="qtext">'+escapeHTML(q.text)+'</p>' +
+        '<div class="options" id="optionsWrap">'+optsHTML+'</div>' +
+        '<div class="feedback-line" id="feedbackLine"></div>' +
+      '</div>' +
+    '</div>';
+
+    document.querySelectorAll('.opt').forEach(function(el){
+      el.addEventListener('click', function(){
+        onAnswer(parseInt(el.getAttribute('data-idx'),10));
+      });
+    });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+
+    runTimer();
+  }
+
+  function runTimer(){
+    var fill = document.getElementById('timerFill');
+    var ticked = false;
+    if(state.timerHandle) clearInterval(state.timerHandle);
+    var startTs = Date.now();
+    var duration = state.timeLeft * 1000;
+    state.timerHandle = setInterval(function(){
+      var elapsed = Date.now() - startTs;
+      var remain = Math.max(0, duration - elapsed);
+      var pct = (remain/duration)*100;
+      if(fill){
+        fill.style.width = pct+'%';
+        if(pct < 30){ fill.classList.add('danger'); }
+      }
+      if(pct < 30 && !ticked){ ticked = true; }
+      if(remain <= 0){
+        clearInterval(state.timerHandle);
+        if(!state.answered){ onAnswer(-1); }
+      }
+    }, 60);
+  }
+
+  function onAnswer(idx){
+    if(state.answered) return;
+    state.answered = true;
+    if(state.timerHandle) clearInterval(state.timerHandle);
+
+    var q = shuffledQ[state.qIndex];
+    var fill = document.getElementById('timerFill');
+    var timeLeftPct = fill ? (parseFloat(fill.style.width)||0)/100 : 0;
+    var correct = idx === q.correct;
+
+    document.querySelectorAll('.opt').forEach(function(el, i){
+      el.setAttribute('disabled','true');
+      if(i === q.correct){ el.classList.add('correct'); }
+      else if(i === idx){ el.classList.add('wrong'); }
+      else { el.classList.add('dim'); }
+    });
+
+    var gained = 0;
+    if(correct){
+      ensureAudio(); sfxCorrect();
+      state.player.streak += 1;
+      var base = Math.round(400 + 600*timeLeftPct);
+      var mult = 1 + Math.min(state.player.streak-1, 4)*0.15;
+      gained = Math.round(base*mult);
+      state.player.score += gained;
+      if(state.player.streak > 0 && state.player.streak % 2 === 0){
+        state.player.sabotagePoints += 1;
+      }
+      document.getElementById('feedbackLine').innerHTML = 'Correto! +'+gained+' pontos · sequência '+state.player.streak+'x';
+    } else {
+      ensureAudio(); sfxWrong();
+      state.player.streak = 0;
+      document.getElementById('feedbackLine').innerHTML = idx===-1 ? 'Tempo esgotado. A resposta certa está em verde.' : 'Não foi dessa vez. A resposta certa está em verde.';
+    }
+    state.lastGain = gained;
+    if(gained>0) showScorePop(gained);
+
+    simulateBots();
+
+    setTimeout(function(){
+      advance();
+    }, 1500);
+  }
+
+  function showScorePop(v){
+    var el = document.createElement('div');
+    el.className = 'score-pop';
+    el.textContent = '+'+v+' pontos';
+    document.body.appendChild(el);
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 2000);
+  }
+
+  function simulateBots(){
+    state.bots.forEach(function(b){
+      var skill = 0.62;
+      if(b.hindered){ skill -= 0.28; }
+      if(b.boosted){ skill += 0.15; }
+      var correct = Math.random() < skill;
+      if(correct){
+        var speedFactor = 0.35 + Math.random()*0.55;
+        if(b.hindered) speedFactor *= 0.5;
+        b.score += Math.round(350 + 550*speedFactor);
+      }
+      b.hindered = false;
+      b.boosted = false;
+    });
+  }
+
+  function advance(){
+    state.qIndex += 1;
+    if(state.qIndex >= TOTAL_Q){
+      state.screen = 'final';
+      render();
+      return;
+    }
+    if(state.qIndex % 3 === 0){
+      state.screen = 'leaderboard';
+      render();
+    } else {
+      render();
+    }
+  }
+
+  function escapeHTML(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ===================== SCREEN: LEADERBOARD ===================== */
+  function getRanking(){
+    var all = [{name:state.player.name, face:state.player.face, color:state.player.color, score:state.player.score, isMe:true}];
+    state.bots.forEach(function(b){ all.push({name:b.name, face:b.face, color:b.color, score:b.score, isMe:false, ref:b}); });
+    all.sort(function(a,b){ return b.score - a.score; });
+    return all;
+  }
+
+  function renderLeaderboard(){
+    ensureAudio(); sfxRank();
+    var ranking = getRanking();
+    var rowsHTML = ranking.map(function(r, i){
+      return '<div class="lb-row'+(r.isMe?' me':'')+'">' +
+        '<div class="lb-rank">'+(i+1)+'</div>' +
+        '<div class="lb-avatar" style="background:'+r.color+'33; border:1.5px solid '+r.color+';">'+r.face+'</div>' +
+        '<div class="lb-name">'+escapeHTML(r.name)+(r.isMe?'<span class="lb-tag">você</span>':'')+'</div>' +
+        '<div class="lb-score">'+r.score+'</div>' +
+      '</div>';
+    }).join('');
+
+    var canSabotage = state.player.sabotagePoints >= 2 && state.qIndex < TOTAL_Q;
+
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:22px;margin:4px 0 4px;">Placar da rodada</h1>' +
+      '<p class="lede">Pergunta '+(state.qIndex+1)+' de '+TOTAL_Q+' a seguir.</p>' +
+      '<div class="card">'+rowsHTML+'</div>' +
+      (canSabotage ?
+        '<button class="primary" id="toSabotage" style="background:var(--coral);">Usar sabotagem (⚡'+state.player.sabotagePoints+')</button><div style="height:10px;"></div>' : '') +
+      '<button class="ghost" id="continueQuiz" style="width:100%;">Continuar corrida</button>' +
+    '</div>';
+
+    on('toSabotage','click', function(){ ensureAudio(); sfxClick(); state.screen='sabotageChoose'; render(); });
+    on('continueQuiz','click', function(){ ensureAudio(); sfxWhoosh(); state.screen='quiz'; render(); });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+
+  /* ===================== SCREEN: SABOTAGE CHOOSE TARGET ===================== */
+  function renderSabotageChoose(){
+    var targets = state.bots.map(function(b, i){
+      return '<div class="target-row" data-idx="'+i+'">' +
+        '<div class="lb-avatar" style="background:'+b.color+'33; border:1.5px solid '+b.color+';">'+b.face+'</div>' +
+        '<div style="flex:1;"><b style="font-size:14px;">'+escapeHTML(b.name)+'</b><div class="muted-small">'+b.score+' pontos</div></div>' +
+      '</div>';
+    }).join('');
+
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:22px;margin:4px 0 4px;">Escolha seu alvo</h1>' +
+      '<div class="sabotage-note">A sabotagem afeta apenas a próxima pergunta do adversário escolhido.</div>' +
+      '<div class="card"><div class="target-list">'+targets+'</div></div>' +
+      '<button class="ghost" id="backLB" style="width:100%;">Voltar</button>' +
+    '</div>';
+
+    document.querySelectorAll('.target-row').forEach(function(el){
+      el.addEventListener('click', function(){
+        ensureAudio(); sfxSelect();
+        state.sabotageTarget = parseInt(el.getAttribute('data-idx'),10);
+        state.screen = 'sabotageAction';
+        render();
+      });
+    });
+    on('backLB','click', function(){ ensureAudio(); sfxClick(); state.screen='leaderboard'; render(); });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+
+  /* ===================== SCREEN: SABOTAGE ACTION ===================== */
+  function renderSabotageAction(){
+    var bot = state.bots[state.sabotageTarget];
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:22px;margin:4px 0 4px;">Sabotar '+escapeHTML(bot.name)+'</h1>' +
+      '<p class="lede">Escolha o tipo de sabotagem. Custa pontos de sabotagem (⚡).</p>' +
+      '<div class="card">' +
+        '<div class="sab-options">' +
+          '<button class="sab-opt" data-type="delay" data-cost="2"><span class="sab-ico">⏳</span><div class="sab-txt"><b>Atrasar relógio (⚡2)</b><span>Reduz bastante a velocidade de resposta dele.</span></div></button>' +
+          '<button class="sab-opt" data-type="confuse" data-cost="2"><span class="sab-ico">🌀</span><div class="sab-txt"><b>Embaralhar engrenagens (⚡2)</b><span>Reduz a chance de acerto na próxima pergunta.</span></div></button>' +
+          '<button class="sab-opt" data-type="steal" data-cost="3"><span class="sab-ico">🪙</span><div class="sab-txt"><b>Roubar pontos (⚡3)</b><span>Transfere 150 pontos dele para você agora.</span></div></button>' +
+        '</div>' +
+      '</div>' +
+      '<button class="ghost" id="backChoose" style="width:100%;">Voltar</button>' +
+    '</div>';
+
+    document.querySelectorAll('.sab-opt').forEach(function(el){
+      el.addEventListener('click', function(){
+        var cost = parseInt(el.getAttribute('data-cost'),10);
+        if(state.player.sabotagePoints < cost){
+          ensureAudio(); sfxWrong();
+          return;
+        }
+        ensureAudio(); sfxSabotage();
+        state.player.sabotagePoints -= cost;
+        var type = el.getAttribute('data-type');
+        var bot = state.bots[state.sabotageTarget];
+        if(type==='delay' || type==='confuse'){ bot.hindered = true; }
+        if(type==='steal'){
+          var stolen = Math.min(150, bot.score);
+          bot.score -= stolen;
+          state.player.score += stolen;
+        }
+        state.screen = 'leaderboard';
+        render();
+      });
+    });
+    on('backChoose','click', function(){ ensureAudio(); sfxClick(); state.screen='sabotageChoose'; render(); });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+
+  /* ===================== SCREEN: FINAL ===================== */
+  function renderFinal(){
+    ensureAudio(); sfxVictory();
+    var ranking = getRanking();
+    var top3 = ranking.slice(0,3);
+    var order = [1,0,2];
+    var heights = [78,110,58];
+    var podiumHTML = order.map(function(pos){
+      var r = top3[pos];
+      if(!r) return '';
+      return '<div class="podium-col">' +
+        '<div class="podium-avatar" style="background:'+r.color+'33; border-color:'+r.color+';">'+r.face+'</div>' +
+        '<div class="podium-bar" style="height:'+heights[pos]+'px;">'+(pos+1)+'&#186;</div>' +
+        '<div class="podium-name">'+escapeHTML(r.name)+'</div>' +
+      '</div>';
+    }).join('');
+
+    var restHTML = ranking.slice(3).map(function(r,i){
+      return '<div class="lb-row'+(r.isMe?' me':'')+'">' +
+        '<div class="lb-rank">'+(i+4)+'</div>' +
+        '<div class="lb-avatar" style="background:'+r.color+'33; border:1.5px solid '+r.color+';">'+r.face+'</div>' +
+        '<div class="lb-name">'+escapeHTML(r.name)+(r.isMe?'<span class="lb-tag">você</span>':'')+'</div>' +
+        '<div class="lb-score">'+r.score+'</div>' +
+      '</div>';
+    }).join('');
+
+    var myRank = ranking.findIndex(function(r){ return r.isMe; }) + 1;
+    var msg = myRank===1 ? 'Você dominou o tempo verbal e o placar!' :
+              myRank<=3 ? 'Pódio garantido — bom domínio do Past Continuous!' :
+              'Quase lá — revise "was/were + verbo-ing" e tente de novo.';
+
+    root().innerHTML =
+    headerHTML() +
+    '<div class="screen">' +
+      '<h1 style="font-size:24px;margin:4px 0 4px; text-align:center;">Corrida finalizada</h1>' +
+      '<p class="lede" style="text-align:center;">'+msg+'</p>' +
+      '<div class="podium">'+podiumHTML+'</div>' +
+      (restHTML ? '<div class="card">'+restHTML+'</div>' : '') +
+      '<button class="primary" id="playAgain">Jogar novamente</button>' +
+      '<div style="height:10px;"></div>' +
+      '<button class="ghost" id="newChar" style="width:100%;">Trocar personagem</button>' +
+    '</div>';
+
+    on('playAgain','click', function(){
+      ensureAudio(); sfxWhoosh();
+      shuffledQ = shuffle(QUESTIONS.slice());
+      state.qIndex = 0;
+      state.player.score = 0;
+      state.player.streak = 0;
+      state.player.sabotagePoints = 0;
+      state.bots.forEach(function(b){ b.score=0; b.hindered=false; b.boosted=false; });
+      state.screen = 'quiz';
+      render();
+    });
+    on('newChar','click', function(){ ensureAudio(); sfxClick(); state.screen='character'; render(); });
+    on('musicToggle','click', function(){ ensureAudio(); toggleMusic(); });
+  }
+
+  /* ===================== ROUTER ===================== */
+  function render(){
+    if(state.screen==='character') renderCharacter();
+    else if(state.screen==='rules') renderRules();
+    else if(state.screen==='quiz') renderQuiz();
+    else if(state.screen==='leaderboard') renderLeaderboard();
+    else if(state.screen==='sabotageChoose') renderSabotageChoose();
+    else if(state.screen==='sabotageAction') renderSabotageAction();
+    else if(state.screen==='final') renderFinal();
+    renderMusicBtn();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
